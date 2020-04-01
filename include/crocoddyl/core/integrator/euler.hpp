@@ -44,7 +44,9 @@ class IntegratedActionModelEulerTpl : public ActionModelAbstractTpl<_Scalar> {
 
   void set_dt(const Scalar& dt);
   void set_differential(boost::shared_ptr<DifferentialActionModelAbstract> model);
-
+  boost::shared_ptr<DifferentialActionModelAbstract> differential_;
+  
+  
  protected:
   using Base::has_control_limits_;  //!< Indicates whether any of the control limits
   using Base::nr_;                  //!< Dimension of the cost residual
@@ -55,7 +57,6 @@ class IntegratedActionModelEulerTpl : public ActionModelAbstractTpl<_Scalar> {
   using Base::unone_;               //!< Neutral state
 
  private:
-  boost::shared_ptr<DifferentialActionModelAbstract> differential_;
   Scalar time_step_;
   Scalar time_step2_;
   bool with_cost_residual_;

@@ -1,5 +1,8 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 
+SET(CMAKE_C_COMPILER /usr/bin/clang-10)
+SET(CMAKE_CXX_COMPILER /usr/bin/clang++-10)
+
 # Set up project properties
 SET(PROJECT_NAMESPACE loco-3d)
 SET(PROJECT_NAME crocoddyl)
@@ -15,8 +18,9 @@ ENDIF()
 INCLUDE(cmake/base.cmake)
 INCLUDE(cmake/test.cmake)
 INCLUDE(cmake/boost.cmake)
-INCLUDE(cmake/python.cmake)
 INCLUDE(cmake/apple.cmake)
+
+SET(CMAKE_CXX_STANDARD 11)
 
 # Print initial message
 MESSAGE("${PROJECT_DESCRIPTION}, version ${PROJECT_VERSION}")
@@ -38,10 +42,10 @@ SET(CXX_DISABLE_WERROR True)
 
 # Create different building options
 OPTION(ENABLE_VECTORIZATION "Enable vectorization and further processor-related optimizations" OFF)
-OPTION(BUILD_PYTHON_INTERFACE "Build the python binding" ON)
-OPTION(BUILD_UNIT_TESTS "Build the unitary tests" ON)
+OPTION(BUILD_PYTHON_INTERFACE "Build the python binding" OFF)
+OPTION(BUILD_UNIT_TESTS "Build the unitary tests" OFF)
 OPTION(BUILD_BENCHMARK "Build the benchmark" ON)
-OPTION(BUILD_EXAMPLES "Build the examples" ON)
+OPTION(BUILD_EXAMPLES "Build the examples" OFF)
 
 
 IF(ENABLE_VECTORIZATION)
@@ -56,14 +60,19 @@ APPLY_DEFAULT_APPLE_CONFIGURATION()
 
 # Add the different required and optional dependencies
 ADD_REQUIRED_DEPENDENCY("eigen3 >= 3.0.5")
-ADD_REQUIRED_DEPENDENCY("eigenpy >= 2.2.0")
 ADD_REQUIRED_DEPENDENCY("pinocchio >= 2.2.1")
 ADD_REQUIRED_DEPENDENCY("example-robot-data >= 3.1.2")
 ADD_OPTIONAL_DEPENDENCY("quadprog")
 ADD_OPTIONAL_DEPENDENCY("scipy")
 
+OPTION(BUILD_WITH_DEBUGINFO "for post-analysis" OFF)
+IF(BUILD_WITH_DEBUGINFO)
+  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g")
+  SET(CMAKE_SHARED_LINKER_FLAGS "-Wl,--emit-relocs")
+ENDIF()
 
-OPTION(BUILD_WITH_MULTITHREADS "Build the library with the OpenMP support (required OpenMP)" OFF)
+
+OPTION(BUILD_WITH_MULTITHREADS "Build the library with the OpenMP support (required OpenMP)" ON)
 IF(BUILD_WITH_MULTITHREADS)
   SET(BUILD_WITH_NTHREADS "4" CACHE STRING "Number of threads")
   string(REGEX MATCH "^[0-9]+$" BUILD_WITH_NTHREADS  ${BUILD_WITH_NTHREADS})
@@ -90,6 +99,8 @@ SET(BOOST_BUILD_COMPONENTS unit_test_framework)
 SET(BOOST_OPTIONAL_COMPONENTS "")
 
 IF(BUILD_PYTHON_INTERFACE)
+  INCLUDE(cmake/python.cmake)
+  ADD_REQUIRED_DEPENDENCY("eigenpy >= 2.2.0")
   SET(BOOST_OPTIONAL_COMPONENTS ${BOOST_OPTIONAL_COMPONENTS} python)
   FINDPYTHON()
   INCLUDE_DIRECTORIES(SYSTEM ${PYTHON_INCLUDE_DIRS})
@@ -103,12 +114,12 @@ INCLUDE_DIRECTORIES(SYSTEM ${Boost_INCLUDE_DIRS})
 
 
 # Include and add the main directory
-ADD_SUBDIRECTORY(unittest/python/${PROJECT_NAME})
 ADD_SUBDIRECTORY(src)
 
 # Build the Python interface
 IF(BUILD_PYTHON_INTERFACE)
   # Include and add the bindings directory
+  ADD_SUBDIRECTORY(unittest/python/${PROJECT_NAME})
   INCLUDE_DIRECTORIES(bindings)
   ADD_SUBDIRECTORY(bindings)
 ENDIF(BUILD_PYTHON_INTERFACE)

@@ -51,7 +51,7 @@ class ShootingProblemTpl {
   void set_runningModels(const std::vector<boost::shared_ptr<ActionModelAbstract> >& models);
   void set_terminalModel(boost::shared_ptr<ActionModelAbstract> model);
 
- protected:
+
   Scalar cost_;
   std::size_t T_;
   VectorXs x0_;
@@ -59,7 +59,7 @@ class ShootingProblemTpl {
   boost::shared_ptr<ActionDataAbstract> terminal_data_;
   std::vector<boost::shared_ptr<ActionModelAbstract> > running_models_;
   std::vector<boost::shared_ptr<ActionDataAbstract> > running_datas_;
-
+ protected:
  private:
   void allocateData();
 };
