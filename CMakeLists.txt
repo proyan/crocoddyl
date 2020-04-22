@@ -1,5 +1,7 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 3.1)
 
+SET(CMAKE_CXX_COMPILER /usr/bin/clang++-10)
+
 # Set up project properties
 SET(PROJECT_NAMESPACE loco-3d)
 SET(PROJECT_NAME crocoddyl)
@@ -37,11 +39,11 @@ ENDIF()
 SET(CXX_DISABLE_WERROR True)
 
 # Create different building options
-OPTION(ENABLE_VECTORIZATION "Enable vectorization and further processor-related optimizations" OFF)
-OPTION(BUILD_PYTHON_INTERFACE "Build the python binding" ON)
-OPTION(BUILD_UNIT_TESTS "Build the unitary tests" ON)
+OPTION(ENABLE_VECTORIZATION "Enable vectorization and further processor-related optimizations" ON)
+OPTION(BUILD_PYTHON_INTERFACE "Build the python binding" OFF)
+OPTION(BUILD_UNIT_TESTS "Build the unitary tests" OFF)
 OPTION(BUILD_BENCHMARK "Build the benchmark" ON)
-OPTION(BUILD_EXAMPLES "Build the examples" ON)
+OPTION(BUILD_EXAMPLES "Build the examples" OFF)
 
 
 IF(ENABLE_VECTORIZATION)
@@ -55,14 +57,14 @@ PROJECT(${PROJECT_NAME} ${PROJECT_ARGS})
 APPLY_DEFAULT_APPLE_CONFIGURATION()
 
 # Add the different required and optional dependencies
-ADD_PROJECT_DEPENDENCY(pinocchio 2.4.0 REQUIRED PKG_CONFIG_REQUIRES "pinocchio >= 2.4.0")
+ADD_PROJECT_DEPENDENCY(pinocchio 2.4.2 REQUIRED PKG_CONFIG_REQUIRES "pinocchio >= 2.4.2")
 ADD_PROJECT_DEPENDENCY(example-robot-data 3.2.0 REQUIRED PKG_CONFIG_REQUIRES "example-robot-data >= 3.2.0")
 ADD_OPTIONAL_DEPENDENCY("quadprog")
 ADD_OPTIONAL_DEPENDENCY("scipy")
 
-OPTION(BUILD_WITH_CODEGEN_SUPPORT "Build the library with the Code Generation support" OFF)
+OPTION(BUILD_WITH_CODEGEN_SUPPORT "Build the library with the Code Generation support" ON)
 
-OPTION(BUILD_WITH_MULTITHREADS "Build the library with the OpenMP support (required OpenMP)" OFF)
+OPTION(BUILD_WITH_MULTITHREADS "Build the library with the OpenMP support (required OpenMP)" ON)
 IF(BUILD_WITH_MULTITHREADS)
   SET(BUILD_WITH_NTHREADS "4" CACHE STRING "Number of threads")
   string(REGEX MATCH "^[0-9]+$" BUILD_WITH_NTHREADS  ${BUILD_WITH_NTHREADS})
