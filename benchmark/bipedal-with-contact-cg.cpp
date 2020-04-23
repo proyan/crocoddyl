@@ -6,18 +6,16 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-
 #ifdef WITH_MULTITHREADING
 #include <omp.h>
-#define NTHREAD 4
+#define NUM_THREADS WITH_NTHREADS
 #else
-#define NTHREAD 1
+#define NUM_THREADS 1
 #endif
 
 #include <pinocchio/parsers/urdf.hpp>
 #include <pinocchio/parsers/srdf.hpp>
 #include <pinocchio/algorithm/model.hpp>
-#include <pinocchio/algorithm/contact-info.hpp>
 #include <pinocchio/container/aligned-vector.hpp>
 #include <example-robot-data/path.hpp>
 
@@ -42,7 +40,6 @@
 
 #define STDDEV(vec) std::sqrt(((vec - vec.mean())).square().sum() / (vec.size() - 1)) * 1000
 #define AVG(vec) (vec.mean()) * 1000.
-
 
 int main(int argc, char* argv[]) {
   bool CALLBACKS = false;
@@ -270,7 +267,6 @@ int main(int argc, char* argv[]) {
   VectorXs x_rand = cg_runningModel->get_state()->rand();
   VectorXs u_rand = VectorXs::Random(cg_runningModel->get_nu());
 
-
   runningModel->calc(runningData, x_rand, u_rand);
   runningModel->calcDiff(runningData, x_rand, u_rand);
   cg_runningModel->calc(cg_runningData, x_rand, u_rand);
@@ -278,32 +274,32 @@ int main(int argc, char* argv[]) {
   cg_runningModel->calcDiff(cg_runningData, x_rand, u_rand);
 
   Eigen::ArrayXd duration_cd(T);
-  Eigen::ArrayXd avg_cd(NTHREAD);
-  Eigen::ArrayXd stddev_cd(NTHREAD);
+  Eigen::ArrayXd avg_cd(NUM_THREADS);
+  Eigen::ArrayXd stddev_cd(NUM_THREADS);
 
   Eigen::ArrayXd duration_cd_wo_calc(T);
-  Eigen::ArrayXd avg_cd_wo_calc(NTHREAD);
-  Eigen::ArrayXd stddev_cd_wo_calc(NTHREAD);
+  Eigen::ArrayXd avg_cd_wo_calc(NUM_THREADS);
+  Eigen::ArrayXd stddev_cd_wo_calc(NUM_THREADS);
 
   Eigen::ArrayXd duration_calc(T);
-  Eigen::ArrayXd avg_calc(NTHREAD);
-  Eigen::ArrayXd stddev_calc(NTHREAD);
+  Eigen::ArrayXd avg_calc(NUM_THREADS);
+  Eigen::ArrayXd stddev_calc(NUM_THREADS);
 
   Eigen::ArrayXd duration_dcalc(T);
-  Eigen::ArrayXd avg_dcalc(NTHREAD);
-  Eigen::ArrayXd stddev_dcalc(NTHREAD);
+  Eigen::ArrayXd avg_dcalc(NUM_THREADS);
+  Eigen::ArrayXd stddev_dcalc(NUM_THREADS);
 
   Eigen::ArrayXd duration_dcalcpin(T);
-  Eigen::ArrayXd avg_dcalcpin(NTHREAD);
-  Eigen::ArrayXd stddev_dcalcpin(NTHREAD);
+  Eigen::ArrayXd avg_dcalcpin(NUM_THREADS);
+  Eigen::ArrayXd stddev_dcalcpin(NUM_THREADS);
 
   Eigen::ArrayXd duration_diffcalcpin(T);
-  Eigen::ArrayXd avg_diffcalcpin(NTHREAD);
-  Eigen::ArrayXd stddev_diffcalcpin(NTHREAD);
+  Eigen::ArrayXd avg_diffcalcpin(NUM_THREADS);
+  Eigen::ArrayXd stddev_diffcalcpin(NUM_THREADS);
 
   problem->calc(xs, us);
 
-  for (int ithread = 0; ithread < NTHREAD; ++ithread) {
+  for (int ithread = 0; ithread < NUM_THREADS; ++ithread) {
     duration_cd.setZero();
 #ifdef WITH_MULTITHREADING
     omp_set_num_threads(ithread + 1);
@@ -330,7 +326,7 @@ int main(int argc, char* argv[]) {
   }
 
   // CALC Timings
-  for (int ithread = 0; ithread < NTHREAD; ++ithread) {
+  for (int ithread = 0; ithread < NUM_THREADS; ++ithread) {
     duration_calc.setZero();
 #ifdef WITH_MULTITHREADING
     omp_set_num_threads(ithread + 1);
@@ -356,7 +352,7 @@ int main(int argc, char* argv[]) {
   }
 
   // differential CALC Timings
-  for (int ithread = 0; ithread < NTHREAD; ++ithread) {
+  for (int ithread = 0; ithread < NUM_THREADS; ++ithread) {
     duration_dcalc.setZero();
 #ifdef WITH_MULTITHREADING
     omp_set_num_threads(ithread + 1);
@@ -422,32 +418,32 @@ int main(int argc, char* argv[]) {
   /***************************CHECKING CODE GEN TIMINGS*********************/
 
   Eigen::ArrayXd cg_duration_cd(T);
-  Eigen::ArrayXd cg_avg_cd(NTHREAD);
-  Eigen::ArrayXd cg_stddev_cd(NTHREAD);
+  Eigen::ArrayXd cg_avg_cd(NUM_THREADS);
+  Eigen::ArrayXd cg_stddev_cd(NUM_THREADS);
 
   Eigen::ArrayXd cg_duration_cd_wo_calc(T);
-  Eigen::ArrayXd cg_avg_cd_wo_calc(NTHREAD);
-  Eigen::ArrayXd cg_stddev_cd_wo_calc(NTHREAD);
+  Eigen::ArrayXd cg_avg_cd_wo_calc(NUM_THREADS);
+  Eigen::ArrayXd cg_stddev_cd_wo_calc(NUM_THREADS);
 
   Eigen::ArrayXd cg_duration_calc(T);
-  Eigen::ArrayXd cg_avg_calc(NTHREAD);
-  Eigen::ArrayXd cg_stddev_calc(NTHREAD);
+  Eigen::ArrayXd cg_avg_calc(NUM_THREADS);
+  Eigen::ArrayXd cg_stddev_calc(NUM_THREADS);
 
   Eigen::ArrayXd cg_duration_dcalc(T);
-  Eigen::ArrayXd cg_avg_dcalc(NTHREAD);
-  Eigen::ArrayXd cg_stddev_dcalc(NTHREAD);
+  Eigen::ArrayXd cg_avg_dcalc(NUM_THREADS);
+  Eigen::ArrayXd cg_stddev_dcalc(NUM_THREADS);
 
   Eigen::ArrayXd cg_duration_dcalcpin(T);
-  Eigen::ArrayXd cg_avg_dcalcpin(NTHREAD);
-  Eigen::ArrayXd cg_stddev_dcalcpin(NTHREAD);
+  Eigen::ArrayXd cg_avg_dcalcpin(NUM_THREADS);
+  Eigen::ArrayXd cg_stddev_dcalcpin(NUM_THREADS);
 
   Eigen::ArrayXd cg_duration_diffcalcpin(T);
-  Eigen::ArrayXd cg_avg_diffcalcpin(NTHREAD);
-  Eigen::ArrayXd cg_stddev_diffcalcpin(NTHREAD);
+  Eigen::ArrayXd cg_avg_diffcalcpin(NUM_THREADS);
+  Eigen::ArrayXd cg_stddev_diffcalcpin(NUM_THREADS);
 
   cg_problem->calc(xs, us);
 
-  for (int ithread = 0; ithread < NTHREAD; ++ithread) {
+  for (int ithread = 0; ithread < NUM_THREADS; ++ithread) {
     cg_duration_cd.setZero();
 #ifdef WITH_MULTITHREADING
     omp_set_num_threads(ithread + 1);
@@ -475,7 +471,7 @@ int main(int argc, char* argv[]) {
   }
 
   // CALC Timings
-  for (int ithread = 0; ithread < NTHREAD; ++ithread) {
+  for (int ithread = 0; ithread < NUM_THREADS; ++ithread) {
     cg_duration_calc.setZero();
 #ifdef WITH_MULTITHREADING
     omp_set_num_threads(ithread + 1);
@@ -499,5 +495,4 @@ int main(int argc, char* argv[]) {
               << cg_stddev_calc[ithread] << " (per nodes/thread: " << cg_avg_calc[ithread] * (ithread + 1) / N
               << " +- " << cg_stddev_calc[ithread] * (ithread + 1) / N << ")" << std::endl;
   }
-  
 }
