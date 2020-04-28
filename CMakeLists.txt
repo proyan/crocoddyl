@@ -39,7 +39,7 @@ ENDIF()
 SET(CXX_DISABLE_WERROR True)
 
 # Create different building options
-OPTION(ENABLE_VECTORIZATION "Enable vectorization and further processor-related optimizations" ON)
+OPTION(ENABLE_VECTORIZATION "Enable vectorization and further processor-related optimizations" OFF)
 OPTION(BUILD_PYTHON_INTERFACE "Build the python binding" OFF)
 OPTION(BUILD_UNIT_TESTS "Build the unitary tests" OFF)
 OPTION(BUILD_BENCHMARK "Build the benchmark" ON)
