@@ -1,5 +1,9 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 3.1)
 
+SET(CMAKE_CXX_STANDARD 14)
+SET(CMAKE_CXX_COMPILER /usr/bin/clang++-10)
+SET(CMAKE_C_COMPILER /usr/bin/clang-10)
+
 # Set up project properties
 SET(PROJECT_NAMESPACE loco-3d)
 SET(PROJECT_NAME crocoddyl)
@@ -41,10 +45,10 @@ SET(PROJECT_USE_CMAKE_EXPORT True)
 
 # Create different building options
 OPTION(ENABLE_VECTORIZATION "Enable vectorization and further processor-related optimizations" OFF)
-OPTION(BUILD_PYTHON_INTERFACE "Build the python binding" ON)
-OPTION(BUILD_UNIT_TESTS "Build the unitary tests" ON)
+OPTION(BUILD_PYTHON_INTERFACE "Build the python binding" OFF)
+OPTION(BUILD_UNIT_TESTS "Build the unitary tests" OFF)
 OPTION(BUILD_BENCHMARK "Build the benchmark" ON)
-OPTION(BUILD_EXAMPLES "Build the examples" ON)
+OPTION(BUILD_EXAMPLES "Build the examples" OFF)
 
 
 IF(ENABLE_VECTORIZATION)
@@ -60,19 +64,19 @@ APPLY_DEFAULT_APPLE_CONFIGURATION()
 SET(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/find-external/CppAD/" ${CMAKE_MODULE_PATH})
 
 # Add the different required and optional dependencies
-ADD_PROJECT_DEPENDENCY(pinocchio 2.4.7 REQUIRED PKG_CONFIG_REQUIRES "pinocchio >= 2.4.7")
+ADD_PROJECT_DEPENDENCY(pinocchio 2.4.5 REQUIRED PKG_CONFIG_REQUIRES "pinocchio >= 2.4.5")
 ADD_PROJECT_DEPENDENCY(example-robot-data 3.2.0 REQUIRED PKG_CONFIG_REQUIRES "example-robot-data >= 3.2.0")
 ADD_OPTIONAL_DEPENDENCY("quadprog")
 ADD_OPTIONAL_DEPENDENCY("scipy")
 
-OPTION(BUILD_WITH_CODEGEN_SUPPORT "Build the library with the Code Generation support (required CppADCodeGen)" OFF)
+OPTION(BUILD_WITH_CODEGEN_SUPPORT "Build the library with the Code Generation support (required CppADCodeGen)" ON)
 
-OPTION(BUILD_WITH_MULTITHREADS "Build the library with the Multithreading support (required OpenMP)" OFF)
+OPTION(BUILD_WITH_MULTITHREADS "Build the library with the Multithreading support (required OpenMP)" ON)
 IF(BUILD_WITH_MULTITHREADS)
   INCLUDE(ProcessorCount)
   ProcessorCount(NPROCESSOR)
   IF(NOT NPROCESSOR EQUAL 0)
-    MATH(EXPR NPROCESSOR ${NPROCESSOR}/2)
+    MATH(EXPR NPROCESSOR ${NPROCESSOR})
     SET(BUILD_WITH_NTHREADS ${NPROCESSOR} CACHE STRING "Number of threads")
   ELSE()
     SET(BUILD_WITH_NTHREADS "4" CACHE STRING "Number of threads") # Default setting

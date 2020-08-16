@@ -1,17 +1,18 @@
 SET(${PROJECT_NAME}_BENCHMARK
-  boxqp
-  unicycle-optctrl
-  lqr-optctrl
-  arm-manipulation-optctrl
-  arm-manipulation-timings
-  quadrupedal-gaits-optctrl
-  bipedal-timings
+  #boxqp
+  #unicycle-optctrl
+  #lqr-optctrl
+  #arm-manipulation-optctrl
+  #arm-manipulation-timings
+  #quadrupedal-gaits-optctrl
+  #bipedal-timings
   )
 
 
 
 SET(${PROJECT_NAME}_CODEGEN_BENCHMARK
   all-robots
+  all-robots-constrained
   )
 LIST(APPEND ${PROJECT_NAME}_BENCHMARK ${${PROJECT_NAME}_CODEGEN_BENCHMARK})
 
