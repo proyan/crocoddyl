@@ -11,11 +11,49 @@
 
 #include <boost/shared_ptr.hpp>
 
+#include <pinocchio/algorithm/contact-info.hpp>
 #include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/multibody/data/multibody.hpp"
 #include "crocoddyl/multibody/contacts/multiple-contacts.hpp"
 
 namespace crocoddyl {
+
+template <typename Scalar>
+struct DataCollectorConstraintsTpl : virtual DataCollectorAbstractTpl<Scalar> {
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+  typedef pinocchio::RigidContactDataTpl<Scalar,0> RigidContactData;
+  
+  DataCollectorConstraintsTpl<Scalar>(const PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(RigidContactData)& contacts)
+      : DataCollectorAbstractTpl<Scalar>(), contacts(contacts) {}
+  virtual ~DataCollectorConstraintsTpl() {}
+  PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(RigidContactData) contacts;
+  std::vector<pinocchio::FrameIndex> frames;
+};
+
+template <typename Scalar>
+struct DataCollectorMultibodyConstraintsTpl : DataCollectorMultibodyTpl<Scalar>, DataCollectorConstraintsTpl<Scalar> {
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+  typedef pinocchio::RigidContactDataTpl<Scalar,0> RigidContactData;
+  DataCollectorMultibodyConstraintsTpl(pinocchio::DataTpl<Scalar>* const pinocchio,
+                                       PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(RigidContactData) contacts)
+      : DataCollectorMultibodyTpl<Scalar>(pinocchio),
+    DataCollectorConstraintsTpl<Scalar>(contacts) {}
+  virtual ~DataCollectorMultibodyConstraintsTpl() {}
+};
+
+template <typename Scalar>
+struct DataCollectorActMultibodyConstraintsTpl : DataCollectorMultibodyConstraintsTpl<Scalar>,
+                                               DataCollectorActuationTpl<Scalar> {
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+  typedef pinocchio::RigidContactDataTpl<Scalar,0> RigidContactData;
+  DataCollectorActMultibodyConstraintsTpl(pinocchio::DataTpl<Scalar>* const pinocchio,
+                                        boost::shared_ptr<ActuationDataAbstractTpl<Scalar> > actuation,
+                                        PINOCCHIO_STD_VECTOR_WITH_EIGEN_ALLOCATOR(RigidContactData) contacts)
+      : DataCollectorMultibodyConstraintsTpl<Scalar>(pinocchio, contacts),
+        DataCollectorActuationTpl<Scalar>(actuation) {}
+  virtual ~DataCollectorActMultibodyConstraintsTpl() {}
+};
+
 
 template <typename Scalar>
 struct DataCollectorContactTpl : virtual DataCollectorAbstractTpl<Scalar> {

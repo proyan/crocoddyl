@@ -44,6 +44,11 @@ class DifferentialActionModelContactFwdDynamicsTpl;
 template <typename Scalar>
 struct DifferentialActionDataContactFwdDynamicsTpl;
 
+template <typename Scalar>
+class DifferentialActionModelConstrainedDynamicsTpl;
+template <typename Scalar>
+struct DifferentialActionDataConstrainedDynamicsTpl;
+  
 // numdiff
 template <typename Scalar>
 class CostModelNumDiffTpl;
@@ -217,6 +222,15 @@ template <typename Scalar>
 struct DataCollectorActMultibodyInContactTpl;
 
 template <typename Scalar>
+struct DataCollectorConstraintsTpl;
+
+template <typename Scalar>
+struct DataCollectorMultibodyConstraintsTpl;
+
+template <typename Scalar>
+struct DataCollectorActMultibodyConstraintsTpl;
+
+template <typename Scalar>
 struct DataCollectorImpulseTpl;
 
 template <typename Scalar>
@@ -256,7 +270,9 @@ typedef DifferentialActionModelFreeFwdDynamicsTpl<double> DifferentialActionMode
 typedef DifferentialActionDataFreeFwdDynamicsTpl<double> DifferentialActionDataFreeFwdDynamics;
 typedef DifferentialActionModelContactFwdDynamicsTpl<double> DifferentialActionModelContactFwdDynamics;
 typedef DifferentialActionDataContactFwdDynamicsTpl<double> DifferentialActionDataContactFwdDynamics;
-
+typedef DifferentialActionModelConstrainedDynamicsTpl<double> DifferentialActionModelConstrainedDynamics;
+typedef DifferentialActionDataConstrainedDynamicsTpl<double> DifferentialActionDataConstrainedDynamics;
+  
 typedef CostModelNumDiffTpl<double> CostModelNumDiff;
 typedef CostDataNumDiffTpl<double> CostDataNumDiff;
 typedef ContactModelNumDiffTpl<double> ContactModelNumDiff;
@@ -328,6 +344,10 @@ typedef StateMultibodyTpl<double> StateMultibody;
 
 typedef DataCollectorMultibodyTpl<double> DataCollectorMultibody;
 typedef DataCollectorActMultibodyTpl<double> DataCollectorActMultibody;
+typedef DataCollectorConstraintsTpl<double> DataCollectorConstraints;
+typedef DataCollectorMultibodyConstraintsTpl<double> DataCollectorMultibodyConstraints;
+typedef DataCollectorActMultibodyConstraintsTpl<double> DataCollectorActMultibodyConstraints;
+
 typedef DataCollectorContactTpl<double> DataCollectorContact;
 typedef DataCollectorMultibodyInContactTpl<double> DataCollectorMultibodyInContact;
 typedef DataCollectorActMultibodyInContactTpl<double> DataCollectorActMultibodyInContact;
