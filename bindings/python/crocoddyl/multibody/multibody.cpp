@@ -28,6 +28,7 @@ void exposeMultibody() {
   exposeDataCollectorImpulses();
   exposeDifferentialActionFreeFwdDynamics();
   exposeDifferentialActionContactFwdDynamics();
+  exposeDifferentialActionConstrainedDynamics();
   exposeActionImpulseFwdDynamics();
   exposeCostState();
   exposeCostCoMPosition();

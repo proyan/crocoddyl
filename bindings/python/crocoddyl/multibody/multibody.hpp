@@ -31,6 +31,7 @@ void exposeDataCollectorContacts();
 void exposeDataCollectorImpulses();
 void exposeDifferentialActionFreeFwdDynamics();
 void exposeDifferentialActionContactFwdDynamics();
+void exposeDifferentialActionConstrainedDynamics();
 void exposeActionImpulseFwdDynamics();
 void exposeCostState();
 void exposeCostCoMPosition();
