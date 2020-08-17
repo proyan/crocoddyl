@@ -11,7 +11,7 @@
 
 int main() {
 
-  std::vector<std::string> contact_names;
+  std::vector<std::string> contact_names, locked_joints;
   std::vector<crocoddyl::ContactType> contact_types;
 
   // Biped icub Benchmarks
@@ -23,9 +23,21 @@ int main() {
   contact_types.push_back(crocoddyl::Contact6D);
   contact_types.push_back(crocoddyl::Contact6D);
 
+  locked_joints.push_back("arm_left_5_joint");
+  locked_joints.push_back("arm_left_6_joint");
+  locked_joints.push_back("arm_left_7_joint");
+  locked_joints.push_back("arm_right_5_joint");
+  locked_joints.push_back("arm_right_6_joint");
+  locked_joints.push_back("arm_right_7_joint");
+  locked_joints.push_back("gripper_left_joint");
+  locked_joints.push_back("gripper_right_joint");
+  locked_joints.push_back("head_1_joint");
+  locked_joints.push_back("head_2_joint");
+
+  
   RobotEENames bipedTalos(
       "Talos", contact_names, contact_types, EXAMPLE_ROBOT_DATA_MODEL_DIR "/talos_data/robots/talos_reduced.urdf",
-      EXAMPLE_ROBOT_DATA_MODEL_DIR "/talos_data/srdf/talos.srdf", "arm_right_7_joint", "half_sitting");
+      EXAMPLE_ROBOT_DATA_MODEL_DIR "/talos_data/srdf/talos.srdf", "arm_right_7_joint", "half_sitting", locked_joints);
   print_constrained_benchmark(bipedTalos);
 
   return 0;
