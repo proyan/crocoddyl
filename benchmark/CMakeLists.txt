@@ -18,7 +18,13 @@ SET(${PROJECT_NAME}_CODEGEN_BENCHMARK
   Quadruped-HyQ
   Biped-iCub
   Biped-Talos
-  all-robots-constrained
+  Arm-Talos-constrained
+  Arm-Kinova-constrained
+  Quadruped-Solo-constrained
+  Quadruped-Anymal-constrained
+  Quadruped-HyQ-constrained
+  Biped-iCub-constrained
+  Biped-Talos-constrained
   )
 LIST(APPEND ${PROJECT_NAME}_BENCHMARK ${${PROJECT_NAME}_CODEGEN_BENCHMARK})
 
