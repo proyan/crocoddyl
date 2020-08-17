@@ -30,7 +30,7 @@
 
 void print_constrained_benchmark(RobotEENames robot) {
   unsigned int N = 100;  // number of nodes
-  unsigned int T = 1e3;  // number of trials
+  unsigned int T = 5e4;  // number of trials
 
   // Building the running and terminal models
   boost::shared_ptr<crocoddyl::ActionModelAbstract> runningModel, terminalModel;
