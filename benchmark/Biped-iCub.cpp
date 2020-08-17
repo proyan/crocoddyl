@@ -14,18 +14,18 @@ int main() {
   std::vector<crocoddyl::ContactType> contact_types;
 
   // Biped icub Benchmarks
-  std::cout << "********************Biped Talos***********************" << std::endl;
+  std::cout << "********************Biped iCub ***********************" << std::endl;
   contact_names.clear();
   contact_types.clear();
-  contact_names.push_back("leg_right_6_joint");
-  contact_names.push_back("leg_left_6_joint");
+  contact_names.push_back("r_ankle_roll");
+  contact_names.push_back("l_ankle_roll");
   contact_types.push_back(crocoddyl::Contact6D);
   contact_types.push_back(crocoddyl::Contact6D);
 
-  RobotEENames bipedTalos(
-      "Talos", contact_names, contact_types, EXAMPLE_ROBOT_DATA_MODEL_DIR "/talos_data/robots/talos_reduced.urdf",
-      EXAMPLE_ROBOT_DATA_MODEL_DIR "/talos_data/srdf/talos.srdf", "arm_right_7_joint", "half_sitting");
-  print_benchmark(bipedTalos);
+  RobotEENames bipedIcub(
+      "iCub", contact_names, contact_types, EXAMPLE_ROBOT_DATA_MODEL_DIR "/icub_description/robots/icub_reduced.urdf",
+      EXAMPLE_ROBOT_DATA_MODEL_DIR "/icub_description/srdf/icub.srdf", "r_wrist_yaw", "half_sitting");
+  print_benchmark(bipedIcub);
 
   return 0;
 }
