@@ -58,13 +58,25 @@ void build_contact_action_models(RobotEENames robotNames,
   typedef typename crocoddyl::ContactModel6DTpl<Scalar> ContactModel6D;
   typedef typename crocoddyl::ContactModel3DTpl<Scalar> ContactModel3D;
 
+  //Load model in double
   pinocchio::ModelTpl<double> modeld;
   pinocchio::urdf::buildModel(robotNames.urdf_path, pinocchio::JointModelFreeFlyer(), modeld);
   modeld.lowerPositionLimit.head<7>().array() = -1;
   modeld.upperPositionLimit.head<7>().array() = 1.;
   pinocchio::srdf::loadReferenceConfigurations(modeld, robotNames.srdf_path, false);
 
-  pinocchio::ModelTpl<Scalar> model(modeld.cast<Scalar>());
+
+  //Load model and fix joints.
+  pinocchio::ModelTpl<Scalar> model_full(modeld.cast<Scalar>()), model;
+
+  std::vector<pinocchio::JointIndex> locked_joints;
+  for (std::size_t i = 0; i < robotNames.locked_joints.size(); ++i) {
+    locked_joints.push_back(model_full.getJointId(robotNames.locked_joints[i]));
+  }
+  pinocchio::buildReducedModel(model_full, locked_joints,
+                               pinocchio::neutral(model_full), model);
+
+  
   boost::shared_ptr<crocoddyl::StateMultibodyTpl<Scalar> > state =
       boost::make_shared<crocoddyl::StateMultibodyTpl<Scalar> >(
           boost::make_shared<pinocchio::ModelTpl<Scalar> >(model));

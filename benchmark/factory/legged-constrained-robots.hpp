@@ -55,7 +55,18 @@ void build_constrained_action_models(RobotEENames robotNames,
   modeld.upperPositionLimit.head<7>().array() = 1.;
   pinocchio::srdf::loadReferenceConfigurations(modeld, robotNames.srdf_path, false);
 
-  pinocchio::ModelTpl<Scalar> model(modeld.cast<Scalar>());
+
+  //Load model and fix joints.
+  pinocchio::ModelTpl<Scalar> model_full(modeld.cast<Scalar>()), model;
+
+  std::vector<pinocchio::JointIndex> locked_joints;
+  for (std::size_t i = 0; i < robotNames.locked_joints.size(); ++i) {
+    locked_joints.push_back(model_full.getJointId(robotNames.locked_joints[i]));
+  }
+  pinocchio::buildReducedModel(model_full, locked_joints,
+                               pinocchio::neutral(model_full), model);
+
+  
   boost::shared_ptr<crocoddyl::StateMultibodyTpl<Scalar> > state =
       boost::make_shared<crocoddyl::StateMultibodyTpl<Scalar> >(
           boost::make_shared<pinocchio::ModelTpl<Scalar> >(model));
