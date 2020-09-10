@@ -26,26 +26,28 @@ void ContactModel2DTpl<Scalar>::calc(const boost::shared_ptr<ContactDataAbstract
                                      const Eigen::Ref<const VectorXs>&) {
   Data* d = static_cast<Data*>(data.get());
   pinocchio::updateFramePlacement(*state_->get_pinocchio().get(), *d->pinocchio, xref_.id);
-  d->v = pinocchio::getFrameVelocity(*state_->get_pinocchio().get(), *d->pinocchio, xref_.id, pinocchio::LOCAL);
-  const Vector3s& vw = d->v.angular();
-  const Vector3s& vv = d->v.linear();
-
   pinocchio::getFrameJacobian(*state_->get_pinocchio().get(), *d->pinocchio, xref_.id, pinocchio::LOCAL, d->fJf);
+  d->v = pinocchio::getFrameVelocity(*state_->get_pinocchio().get(), *d->pinocchio, xref_.id);
+  d->a = pinocchio::getFrameAcceleration(*state_->get_pinocchio().get(), *d->pinocchio, xref_.id);
+
+  Vector3s a3;
+  
+  //d->Jc = d->fJf.template topRows<3>();
   d->Jc.row(0) = d->fJf.row(0);
   d->Jc.row(1) = d->fJf.row(2);
-
-  d->a = pinocchio::getFrameAcceleration(*state_->get_pinocchio().get(), *d->pinocchio, xref_.id);
-  d->a0[0] = d->a.linear()[0] + vw[1] * vv[2] - vw[2] * vv[1];
-  d->a0[1] = d->a.linear()[2] + vw[0] * vv[1] - vw[1] * vv[0];
+  
+  d->vw = d->v.angular();
+  d->vv = d->v.linear();
+  a3 = d->a.linear() + d->vw.cross(d->vv);
 
   if (gains_[0] != 0.) {
-    d->a0[0] += gains_[0] * (d->pinocchio->oMf[xref_.id].translation()[0] - xref_.translation[0]);
-    d->a0[1] += gains_[0] * (d->pinocchio->oMf[xref_.id].translation()[2] - xref_.translation[2]);
+    a3 += gains_[0] * (d->pinocchio->oMf[xref_.id].translation() - xref_.translation);
   }
   if (gains_[1] != 0.) {
-    d->a0[0] += gains_[1] * vv[0];
-    d->a0[1] += gains_[1] * vv[2];
+    a3 += gains_[1] * d->vv;
   }
+  d->a0[0] = a3[0];
+  d->a0[1] = a3[2];
 }
 
 template <typename Scalar>
@@ -61,42 +63,25 @@ void ContactModel2DTpl<Scalar>::calcDiff(const boost::shared_ptr<ContactDataAbst
   d->fXjda_dq.noalias() = d->fXj * d->a_partial_dq;
   d->fXjda_dv.noalias() = d->fXj * d->a_partial_dv;
 
-  d->da0_dx.leftCols(nv).row(0) = d->fXjda_dq.row(0);
-  d->da0_dx.leftCols(nv).row(0).noalias() += d->vw_skew.row(0) * d->fXjdv_dq.template topRows<3>();
-  d->da0_dx.leftCols(nv).row(0).noalias() -= d->vv_skew.row(0) * d->fXjdv_dq.template bottomRows<3>();
-
-  d->da0_dx.leftCols(nv).row(1) = d->fXjda_dq.row(2);
-  d->da0_dx.leftCols(nv).row(1).noalias() += d->vw_skew.row(2) * d->fXjdv_dq.template topRows<3>();
-  d->da0_dx.leftCols(nv).row(1).noalias() -= d->vv_skew.row(2) * d->fXjdv_dq.template bottomRows<3>();
-
-  d->da0_dx.rightCols(nv).row(0) = d->fXjda_dv.row(0);
-  typename MathBase::RowVector2s vw_skew2D;
-  vw_skew2D(0,0) = d->vw_skew(0,0);
-  vw_skew2D(0,1) = d->vw_skew(0,2);
-  d->da0_dx.rightCols(nv).row(0).noalias() += vw_skew2D * d->Jc;
-  d->da0_dx.rightCols(nv).row(0).noalias() -= d->vv_skew.row(0) * d->fJf.template bottomRows<3>();
-
-  d->da0_dx.rightCols(nv).row(1) = d->fXjda_dv.row(2);
-  vw_skew2D(0,0) = d->vw_skew(2,0);
-  vw_skew2D(0,1) = d->vw_skew(2,2);
-  d->da0_dx.rightCols(nv).row(1).noalias() += vw_skew2D * d->Jc;
-  d->da0_dx.rightCols(nv).row(1).noalias() -= d->vv_skew.row(2) * d->fJf.template bottomRows<3>();
+  Eigen::Matrix<Scalar, 3, Eigen::Dynamic> da3_dx(3, state_->get_ndx());
+  
+  da3_dx.leftCols(nv).noalias() = d->fXjda_dq.template topRows<3>() +
+                                     d->vw_skew * d->fXjdv_dq.template topRows<3>() -
+                                     d->vv_skew * d->fXjdv_dq.template bottomRows<3>();
+  da3_dx.rightCols(nv).noalias() =
+    d->fXjda_dv.template topRows<3>() + d->vw_skew * d->fJf.template topRows<3>() - d->vv_skew * d->fJf.template bottomRows<3>();
 
   if (gains_[0] != 0.) {
     d->oRf = d->pinocchio->oMf[xref_.id].rotation();
-    typename MathBase::Matrix2s oRf2D;
-    oRf2D(0, 0) = d->oRf(0, 0);
-    oRf2D(1, 0) = d->oRf(2, 0);
-    oRf2D(0, 1) = d->oRf(0, 2);
-    oRf2D(1, 1) = d->oRf(2, 2);
-    d->da0_dx.leftCols(nv).noalias() += gains_[0] * oRf2D * d->Jc;
+    da3_dx.leftCols(nv).noalias() += gains_[0] * d->oRf * d->fJf.template topRows<3>();
   }
   if (gains_[1] != 0.) {
-    d->da0_dx.leftCols(nv).row(0).noalias() += gains_[1] * d->fXj.row(0) * d->v_partial_dq;
-    d->da0_dx.leftCols(nv).row(1).noalias() += gains_[1] * d->fXj.row(2) * d->v_partial_dq;
-    d->da0_dx.rightCols(nv).row(0).noalias() += gains_[1] * d->fXj.row(0) * d->a_partial_da;
-    d->da0_dx.rightCols(nv).row(1).noalias() += gains_[1] * d->fXj.row(2) * d->a_partial_da;
+    da3_dx.leftCols(nv).noalias() += gains_[1] * d->fXj.template topRows<3>() * d->v_partial_dq;
+    da3_dx.rightCols(nv).noalias() += gains_[1] * d->fXj.template topRows<3>() * d->a_partial_da;
   }
+
+  d->da0_dx.row(0) = da3_dx.row(0);
+  d->da0_dx.row(1) = da3_dx.row(2);
 }
 
 template <typename Scalar>
