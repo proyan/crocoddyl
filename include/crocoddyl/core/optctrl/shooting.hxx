@@ -8,6 +8,7 @@
 
 #ifdef CROCODDYL_WITH_MULTITHREADING
 #include <omp.h>
+#include <python2.7/Python.h>
 #define NUM_THREADS CROCODDYL_WITH_NTHREADS
 #endif  // CROCODDYL_WITH_MULTITHREADING
 
@@ -141,6 +142,8 @@ Scalar ShootingProblemTpl<Scalar>::calc(const std::vector<VectorXs>& xs, const s
   }
 
 #ifdef CROCODDYL_WITH_MULTITHREADING
+  { PyThreadState *_save; _save = PyEval_SaveThread();
+  
 #pragma omp parallel for
 #endif
   for (std::size_t i = 0; i < T_; ++i) {
@@ -151,6 +154,9 @@ Scalar ShootingProblemTpl<Scalar>::calc(const std::vector<VectorXs>& xs, const s
       running_models_[i]->calc(running_datas_[i], xs[i]);
     }
   }
+#ifdef CROCODDYL_WITH_MULTITHREADING
+    PyEval_RestoreThread(_save); }
+#endif
   terminal_model_->calc(terminal_data_, xs.back());
 
   cost_ = Scalar(0.);
@@ -173,7 +179,9 @@ Scalar ShootingProblemTpl<Scalar>::calcDiff(const std::vector<VectorXs>& xs, con
   }
 
 #ifdef CROCODDYL_WITH_MULTITHREADING
+  { PyThreadState *_save; _save = PyEval_SaveThread();
 #pragma omp parallel for
+  
 #endif
   for (std::size_t i = 0; i < T_; ++i) {
     if (running_models_[i]->get_nu() != 0) {
@@ -183,6 +191,10 @@ Scalar ShootingProblemTpl<Scalar>::calcDiff(const std::vector<VectorXs>& xs, con
       running_models_[i]->calcDiff(running_datas_[i], xs[i]);
     }
   }
+#ifdef CROCODDYL_WITH_MULTITHREADING
+    PyEval_RestoreThread(_save); }
+#endif
+    
   terminal_model_->calcDiff(terminal_data_, xs.back());
 
   cost_ = Scalar(0.);

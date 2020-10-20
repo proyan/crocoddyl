@@ -15,6 +15,7 @@
 namespace crocoddyl {
 namespace python {
 
+  
 void exposeShootingProblem() {
   // Register custom converters between std::vector and Python list
   typedef boost::shared_ptr<ActionModelAbstract> ActionModelPtr;
