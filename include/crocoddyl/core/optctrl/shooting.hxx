@@ -12,6 +12,9 @@
 #define NUM_THREADS CROCODDYL_WITH_NTHREADS
 #endif  // CROCODDYL_WITH_MULTITHREADING
 
+#include <iostream>
+#include  "crocoddyl/core/utils/timer.hpp"
+
 namespace crocoddyl {
 
 template <typename Scalar>
@@ -177,7 +180,9 @@ Scalar ShootingProblemTpl<Scalar>::calcDiff(const std::vector<VectorXs>& xs, con
     throw_pretty("Invalid argument: "
                  << "us has wrong dimension (it should be " + std::to_string(T_) + ")");
   }
-
+  double duration = 0;
+  crocoddyl::Timer timer;
+  
 #ifdef CROCODDYL_WITH_MULTITHREADING
   { PyThreadState *_save; _save = PyEval_SaveThread();
 #pragma omp parallel for
@@ -202,7 +207,8 @@ Scalar ShootingProblemTpl<Scalar>::calcDiff(const std::vector<VectorXs>& xs, con
     cost_ += running_datas_[i]->cost;
   }
   cost_ += terminal_data_->cost;
-
+  
+  std::cerr<<timer.get_us_duration()<<"us time"<<std::endl;
   return cost_;
 }
 
