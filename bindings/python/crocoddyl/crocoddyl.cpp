@@ -16,6 +16,8 @@ namespace python {
 namespace bp = boost::python;
 
 BOOST_PYTHON_MODULE(libcrocoddyl_pywrap) {
+  PyEval_InitThreads();
+  
   bp::scope().attr("__version__") = printVersion();
 
   eigenpy::enableEigenPy();
